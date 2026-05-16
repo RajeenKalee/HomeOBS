@@ -1,0 +1,28 @@
+---
+- name: Bootstrap K3s master
+  hosts: master
+  become: true
+  tasks:
+    - name: Install K3s server                                                                                              
+      shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="{{ k3s_version }}" sh -s - server \
+          --disable traefik \
+          --node-label role=master
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for K3s to be ready
+      wait_for:
+        path: /etc/rancher/k3s/k3s.yaml
+        timeout: 60
+
+    - name: Read node token
+      slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: node_token
+
+    - name: Fetch kubeconfig
+      fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: ~/.kube/k3s-config
+        flat: true

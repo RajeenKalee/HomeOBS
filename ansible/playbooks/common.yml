@@ -1,0 +1,53 @@
+---
+- name: Common node preparation
+  hosts: all
+  become: true
+  tasks:
+    - name: Update APT Cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install Required packages
+      apt:
+        name:
+          - curl
+          - open-iscsi
+          - nfs-common
+        state: present
+
+    - name: Set hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Enable open-iscsi
+      systemd:
+        name: open-iscsi
+        enabled: true
+        state: started
+
+    - name: Configure swap on workers
+      when: inventory_hostname in groups['workers']
+      block:
+        - name: Create swap file
+          command: fallocate -l 2G /swapfile
+          args:
+            creates: /swapfile
+
+        - name: Set swap file permissions
+          file:
+            path: /swapfile
+            mode: '0600'
+
+        - name: Format swap file
+          command: mkswap /swapfile
+
+        - name: Enable swap
+          command: swapon /swapfile
+          ignore_errors: true
+
+        - name: Add swap to fstab
+          lineinfile:
+            path: /etc/fstab
+            line: '/swapfile none swap sw 0 0'
+            state: present

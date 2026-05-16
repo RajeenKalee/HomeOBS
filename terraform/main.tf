@@ -11,8 +11,14 @@ resource "proxmox_virtual_environment_file" "cloud_init" {
         - qemu-guest-agent
       runcmd:
         - systemctl enable --now qemu-guest-agent
+      users:
+        - name: ${var.ci_user}
+          shell: /bin/bash
+          sudo: ALL=(ALL) NOPASSWD:ALL
+          ssh_authorized_keys:
+            - ${var.ssh_public_key}
     EOF
-    file_name = "k8s-cloud-init.yaml"
+    file_name = "${var.cluster_name}-cloud-init.yaml"
   }
 }
 

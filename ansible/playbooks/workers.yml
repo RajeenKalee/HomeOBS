@@ -1,0 +1,26 @@
+---
+- name: Bootstrap K3s workers
+  hosts: workers
+  become: true
+  tasks:
+    - name: Install K3s agent
+      shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="{{ k3s_version }}" \
+          K3S_URL="https://{{ hostvars['k8s-master']['ansible_host'] }}:6443" \
+          K3S_TOKEN="{{ hostvars['k8s-master']['node_token']['content'] | b64decode | trim }}" \
+          sh -
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for K3s agent to start
+      systemd:
+        name: k3s-agent
+        state: started
+        enabled: true
+
+    - name: Label worker nodes
+      delegate_to: k8s-master
+      command: >
+        kubectl label node {{ inventory_hostname }}
+        role=worker
+        --overwrite
