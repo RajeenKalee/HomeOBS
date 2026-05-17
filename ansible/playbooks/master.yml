@@ -26,3 +26,34 @@
         src: /etc/rancher/k3s/k3s.yaml
         dest: ~/.kube/k3s-config
         flat: true
+
+    - name: Create ArgoCD namespace
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      command: kubectl create namespace argocd
+      register: argocd_ns
+      failed_when: argocd_ns.rc != 0 and 'already exists' not in argocd_ns.stderr
+      changed_when: argocd_ns.rc == 0
+
+    - name: Check if ArgoCD is already installed
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      command: kubectl get deployment argocd-server -n argocd
+      register: argocd_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install ArgoCD
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      shell: |
+        kubectl apply -n argocd --server-side --force-conflicts \
+          -f https://raw.githubusercontent.com/argoproj/argo-cd/{{ argocd_version }}/manifests/install.yaml
+      when: argocd_check.rc != 0
+
+    - name: Wait for ArgoCD to be ready
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      command: >
+        kubectl wait --for=condition=available --timeout=300s
+        deployment/argocd-server -n argocd
