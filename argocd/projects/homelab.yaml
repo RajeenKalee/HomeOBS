@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: lab
+  name: homelab
   namespace: argocd
 spec:
-  description: Lab Kubernetes platform
+  description: Homelab Kubernetes platform
   sourceRepos:
     - '*'
   destinations:

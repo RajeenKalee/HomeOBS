@@ -339,7 +339,7 @@ controller:
       servicePort: 10254
       type: ClusterIP
     serviceMonitor:
-      enabled: true
+      enabled: false
       additionalLabels: {}
       annotations: {}
       namespace: ""

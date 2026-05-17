@@ -43,12 +43,17 @@
       failed_when: false
       changed_when: false
 
+    - name: Copy ArgoCD manifest to master node
+      copy:
+        src: ../../argocd/manifests/install.yaml
+        dest: /tmp/argocd-install.yaml
+
     - name: Install ArgoCD
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
       shell: |
         kubectl apply -n argocd --server-side --force-conflicts \
-          -f https://raw.githubusercontent.com/argoproj/argo-cd/{{ argocd_version }}/manifests/install.yaml
+          -f /tmp/argocd-install.yaml
       when: argocd_check.rc != 0
 
     - name: Wait for ArgoCD to be ready
