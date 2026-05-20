@@ -1,0 +1,117 @@
+---
+{{- template "vault.injectorEnabled" . -}}
+{{- if .injectorEnabled -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "vault.fullname" . }}-agent-injector
+  namespace: {{ include "vault.namespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "vault.name" . }}-agent-injector
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  {{ template "injector.serviceAccount.annotations" . }}
+{{ end }}
+---
+{{- template "vault.injectorEnabled" . -}}
+{{- if .injectorEnabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "vault.fullname" . }}-agent-injector-clusterrole
+  labels:
+    app.kubernetes.io/name: {{ include "vault.name" . }}-agent-injector
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+rules:
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources: ["mutatingwebhookconfigurations"]
+  verbs:
+    - "get"
+    - "list"
+    - "watch"
+    - "patch"
+{{- if and (eq (.Values.injector.leaderElector.enabled | toString) "true") (gt (.Values.injector.replicas | int) 1) }}
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs:
+    - "get"
+{{ end }}
+---
+{{ end }}
+{{- template "vault.injectorEnabled" . -}}
+{{- if .injectorEnabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "vault.fullname" . }}-agent-injector-binding
+  labels:
+    app.kubernetes.io/name: {{ include "vault.name" . }}-agent-injector
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "vault.fullname" . }}-agent-injector-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: {{ template "vault.fullname" . }}-agent-injector
+  namespace: {{ include "vault.namespace" . }}
+{{ end }}
+---
+{{- template "vault.injectorEnabled" . -}}
+{{- if .injectorEnabled -}}
+{{- if and (eq (.Values.injector.leaderElector.enabled | toString) "true") (gt (.Values.injector.replicas | int) 1) }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "vault.fullname" . }}-agent-injector-leader-elector-role
+  namespace: {{ include "vault.namespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "vault.name" . }}-agent-injector
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+rules:
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs:
+      - "create"
+      - "get"
+      - "watch"
+      - "list"
+      - "update"
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs:
+      - "delete"
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs:
+      - "get"
+      - "patch"
+      - "delete"
+{{- end }}
+{{- end }}
+---
+{{- template "vault.injectorEnabled" . -}}
+{{- if .injectorEnabled -}}
+{{- if and (eq (.Values.injector.leaderElector.enabled | toString) "true") (gt (.Values.injector.replicas | int) 1) }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "vault.fullname" . }}-agent-injector-leader-elector-binding
+  namespace: {{ include "vault.namespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "vault.name" . }}-agent-injector
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "vault.fullname" . }}-agent-injector-leader-elector-role
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "vault.fullname" . }}-agent-injector
+    namespace: {{ include "vault.namespace" . }}
+{{- end }}
+{{- end }}

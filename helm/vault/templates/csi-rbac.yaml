@@ -1,0 +1,82 @@
+---
+{{- template "vault.csiEnabled" . -}}
+{{- if .csiEnabled -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "vault.fullname" . }}-csi-provider
+  namespace: {{ include "vault.namespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "vault.name" . }}-csi-provider
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- if  .Values.csi.serviceAccount.extraLabels -}}
+      {{- toYaml .Values.csi.serviceAccount.extraLabels | nindent 4 -}}
+    {{- end -}}
+  {{ template "csi.serviceAccount.annotations" . }}
+{{- end }}
+---
+{{- template "vault.csiEnabled" . -}}
+{{- if .csiEnabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "vault.fullname" . }}-csi-provider-clusterrole
+  labels:
+    app.kubernetes.io/name: {{ include "vault.name" . }}-csi-provider
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts/token
+  verbs:
+  - create
+{{- end }}
+---
+{{- template "vault.csiEnabled" . -}}
+{{- if .csiEnabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "vault.fullname" . }}-csi-provider-clusterrolebinding
+  labels:
+    app.kubernetes.io/name: {{ include "vault.name" . }}-csi-provider
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "vault.fullname" . }}-csi-provider-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: {{ template "vault.fullname" . }}-csi-provider
+  namespace: {{ include "vault.namespace" . }}
+{{- end }}
+---
+{{- template "vault.csiEnabled" . -}}
+{{- if .csiEnabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "vault.fullname" . }}-csi-provider-role
+  namespace: {{ include "vault.namespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "vault.name" . }}-csi-provider
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+  resourceNames:
+    {{- if .Values.csi.hmacSecretName }}
+    - {{ .Values.csi.hmacSecretName }}
+    {{- else }}
+    - {{ include "vault.name" . }}-csi-provider-hmac-key
+    {{- end }}
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["create"]
+{{- end }}
