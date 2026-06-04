@@ -1,20 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: vault
+  name: k8s
   namespace: argocd
 spec:
   project: homelab
   source:
     repoURL: https://github.com/RajeenKalee/homeobs.git
     targetRevision: HEAD
-    path: platform/vault
+    path: k8s
   destination:
     server: https://kubernetes.default.svc
-    namespace: vault
+    namespace: default
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true

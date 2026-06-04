@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/RajeenKalee/homeobs.git
     targetRevision: HEAD
-    path: helm/ingress-nginx
+    path: platform/ingress-nginx
   destination:
     server: https://kubernetes.default.svc
     namespace: ingress-nginx
