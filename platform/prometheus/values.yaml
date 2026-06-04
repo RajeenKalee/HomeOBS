@@ -72,10 +72,67 @@ server:
     runAsGroup: 65534
     fsGroup: 65534
 
+  revisionHistoryLimit: 10
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  podLabels: {}
+  priorityClassName: ""
+  runtimeClassName: ""
+  prefixURL: ""
+  baseURL: ""
+  portName: ""
+  storagePath: ""
+  retentionSize: ""
+  env: []
+  defaultFlagsOverride: []
+  extraInitContainers: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  hostNetwork: false
+  dnsPolicy: ClusterFirst
+  dnsConfig: {}
+  hostAliases: []
+  tolerations: []
+  nodeSelector: {}
+  affinity: {}
+  topologySpreadConstraints: []
+  terminationGracePeriodSeconds: 300
+  automountServiceAccountToken: true
+  containerSecurityContext: {}
+  tcpSocketProbeEnabled: false
+  probeScheme: HTTP
+  readinessProbeInitialDelay: 30
+  readinessProbePeriodSeconds: 5
+  readinessProbeTimeout: 4
+  readinessProbeFailureThreshold: 3
+  readinessProbeSuccessThreshold: 1
+  livenessProbeInitialDelay: 30
+  livenessProbePeriodSeconds: 15
+  livenessProbeTimeout: 10
+  livenessProbeFailureThreshold: 3
+  livenessProbeSuccessThreshold: 1
+  startupProbe:
+    enabled: false
+
+  statefulSet:
+    enabled: false
+    podManagementPolicy: OrderedReady
+    pvcDeleteOnStsDelete: false
+    pvcDeleteOnStsScale: false
+
+  daemonSet:
+    enabled: false
+
   service:
     enabled: true
     servicePort: 80
     type: ClusterIP
+    sessionAffinity: None
+    gRPC:
+      enabled: false
+    statefulsetReplica:
+      enabled: false
+    additionalPorts: []
 
   retention: "15d"
 
