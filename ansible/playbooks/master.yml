@@ -63,6 +63,16 @@
         kubectl wait --for=condition=available --timeout=300s
         deployment/argocd-server -n argocd
 
+    - name: Copy ArgoCD repo secret
+      copy:
+        src: ../../k8s/configs/argocd-repo.yaml
+        dest: /tmp/argocd-repo.yaml
+
+    - name: Apply ArgoCD repo secret
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      command: kubectl apply -f /tmp/argocd-repo.yaml
+
     - name: Copy homelab project manifest
       copy:
         src: ../../argocd/projects/homelab.yaml
