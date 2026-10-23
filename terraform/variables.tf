@@ -10,12 +10,12 @@ variable "ssh_username" {
 }
 
 variable "proxmox_api_token_id" {
-  description = "API token ID (format: USER@REALM!TOKENNAME)"
+  description = "API token ID (USER@REALM!TOKENNAME) or op:// reference"
   type        = string
 }
 
 variable "proxmox_api_token_secret" {
-  description = "API token secret (UUID)"
+  description = "API token secret (UUID) or op:// reference"
   type        = string
   sensitive   = true
 }
