@@ -212,7 +212,7 @@ persistence:
   lookupVolumeName: true
 
 initChownData:
-  enabled: true
+  enabled: false
   image:
     registry: docker.io
     repository: library/busybox
