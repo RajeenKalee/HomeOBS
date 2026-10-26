@@ -10,7 +10,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: loki.homelab.local
+    - host: loki.home.coderstudio.org
       http:
         paths:
           - path: /loki/api/v1/push
