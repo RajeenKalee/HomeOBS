@@ -272,6 +272,10 @@ datasources:
         url: http://prometheus-server.observability.svc.cluster.local
         access: proxy
         isDefault: true
+      - name: Loki
+        type: loki
+        url: http://loki.observability.svc.cluster.local:3100
+        access: proxy
 
 alerting: {}
 
