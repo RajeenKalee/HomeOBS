@@ -109,6 +109,7 @@ server:
 
   extraFlags:
     - web.enable-lifecycle
+    - web.enable-remote-write-receiver
 
   configPath: /etc/config/prometheus.yml
 
